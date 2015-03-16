@@ -1,5 +1,70 @@
 #!/usr/bin/python
 
-strOut = "first time using GitHub"
-print "helloworld!"
-print strOut
+#strOut = "first time using GitHub"
+import urllib2
+import re
+
+#define the Domian U want to get info from
+Domain = "http://www.zhihu.com"
+
+#declear some tuple  
+topic_list = []
+question_list= []
+answer_list = []
+results = []
+used_list= []
+
+#func to get html-code
+def GetHtml(url):
+    try:
+        htmlmod = urllib2.urlopen(url)
+        htmlcode = htmlmod.read()
+        return htmlcode
+    except urllib2.URLError,e:
+        print e.reason
+
+#func to get uri matching the reg
+def GetHref(srccode):    
+    reg = r'target="_blank"\shref="(.*?)"'
+    words = re.compile(reg)
+    hrefList = words.findall(srccode)
+    return hrefList
+
+#func to judge Is containing the key we give
+def IsContainKeys(srccode):
+    reg = r"创业"
+    words = re.compile(reg)
+    keylists = words.findall(srccode)
+    if keylists:
+        return True
+    else:
+        return False
+
+#trunk 
+while url:
+    file = open("filespider.txt","a+")
+    print url
+    try:
+        used_list.index(url)
+    except ValueError:
+        try:
+            used_list.append(url)
+            htmlpaper = GetHtml(url)
+            if IsContainKeys(htmlpaper):
+                file.write(url)
+                file.write("\n")
+                print url,"contain keys+++++++++++++++++++++++++++++"
+            results.extend(GetHref(htmlpaper))
+        except TypeError:
+            print "##########################ERROR"
+        
+    result_item = "null"
+    result_item = results.pop()
+        
+    if (result_item.find("http://")==-1):
+        url = Domain + result_item
+    else:
+        url = result_item
+    file.close()    
+#print "helloworld!"
+#print strOut
